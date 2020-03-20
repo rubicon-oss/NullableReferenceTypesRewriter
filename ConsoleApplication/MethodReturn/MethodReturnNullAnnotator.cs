@@ -14,16 +14,19 @@
 using System;
 using System.Linq;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NullableReferenceTypesRewriter.ConsoleApplication.Utilities;
 
-namespace NullableReferenceTypesRewriter.ConsoleApplication
+namespace NullableReferenceTypesRewriter.ConsoleApplication.MethodReturn
 {
-  public class MethodNullAnnotator : SemanticCShapSyntaxRewriter
+  public class MethodReturnNullAnnotator : CSharpSyntaxRewriter
   {
-    public MethodNullAnnotator (SemanticModel semanticModel)
-        : base (semanticModel)
+    private readonly SemanticModel _semanticModel;
+
+    public MethodReturnNullAnnotator (SemanticModel semanticModel)
     {
+      _semanticModel = semanticModel;
     }
 
     public override SyntaxNode? VisitMethodDeclaration (MethodDeclarationSyntax node)
@@ -36,15 +39,15 @@ namespace NullableReferenceTypesRewriter.ConsoleApplication
         return node;
 
       var returnsNull = HasCanBeNullAttribute (node)
-                        || NullUtilities.ReturnsNull (node, Model);
+                        || NullUtilities.ReturnsNull (node, _semanticModel);
 
       if (!returnsNull)
         return node;
 
-      return NullUtilities.MakeNullReturning (node, Model);
+      return NullUtilities.MakeNullReturning (node);
     }
 
-    private static bool HasCanBeNullAttribute (MethodDeclarationSyntax node)
+    private static bool HasCanBeNullAttribute (MemberDeclarationSyntax node)
     {
       return node.AttributeLists.SelectMany (list => list.Attributes)
           .Any (attr => attr.Name.ToString().Contains ("CanBeNull"));

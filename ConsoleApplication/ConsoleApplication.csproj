@@ -2,7 +2,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net472</TargetFramework>
-    <RootNamespace>NullableTypeSetter.ConsoleApplication</RootNamespace>
+    <RootNamespace>NullableReferenceTypesRewriter.ConsoleApplication</RootNamespace>
     <LangVersion>8</LangVersion>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <Nullable>enable</Nullable>

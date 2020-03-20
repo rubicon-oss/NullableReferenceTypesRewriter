@@ -1,10 +1,24 @@
-﻿using System;
+﻿// Copyright (c) rubicon IT GmbH
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"),
+// to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
+// and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+// FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+// WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+//
+
+using System;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace NullableReferenceTypesRewriter.ConsoleApplication
+namespace NullableReferenceTypesRewriter.ConsoleApplication.Utilities
 {
   public static class NullUtilities
   {
@@ -17,49 +31,18 @@ namespace NullableReferenceTypesRewriter.ConsoleApplication
 
       return returnStatements.Any (
           stmt => stmt is ReturnStatementSyntax returnStatement
-                  && IsDefinitlyNull (returnStatement.Expression!, semanticModel));
+                  && CanBeNull (returnStatement.Expression!, semanticModel));
     }
 
-    public static bool IsDefinitlyNull (ExpressionSyntax expression, SemanticModel semanticModel)
+    public static bool CanBeNull (ExpressionSyntax expression, SemanticModel semanticModel)
     {
       var typeInfo = semanticModel.GetTypeInfo (expression);
 
-      if (typeInfo.Nullability.FlowState == NullableFlowState.NotNull)
+      return typeInfo.Nullability.FlowState switch
       {
-        Console.WriteLine ($"NOT NULL:    {expression}");
-        return false;
-      }
-
-      if (typeInfo.Nullability.FlowState == NullableFlowState.MaybeNull)
-      {
-        Console.WriteLine ($"MAYBE NULL:  {expression}");
-        return true;
-      }
-
-      if (typeInfo.Nullability.FlowState == NullableFlowState.None)
-      {
-        Console.WriteLine ($"UNDECIDED:   {expression}");
-      }
-
-      return expression switch
-      {
-          LiteralExpressionSyntax literal => literal.Kind() == SyntaxKind.NullLiteralExpression ||
-                                             literal.Kind() == SyntaxKind.DefaultExpression,
-          InvocationExpressionSyntax invocation => InvokesNullReturningMethod (invocation, semanticModel),
-          _ => false,
+          NullableFlowState.MaybeNull => true,
+          _ => false
       };
-    }
-
-    private static bool InvokesNullReturningMethod (InvocationExpressionSyntax invocation, SemanticModel semanticModel)
-    {
-      var method = semanticModel.GetSymbolInfo (invocation)
-          .Symbol as IMethodSymbol;
-      if (method == null)
-        return false;
-      if (!method.ReturnType.IsReferenceType)
-        return false;
-
-      return method.DeclaringSyntaxReferences.Any (syntaxRef => DoesReturnVoid ((MethodDeclarationSyntax) syntaxRef.GetSyntax()));
     }
 
     public static bool DoesReturnVoid (MethodDeclarationSyntax node)
@@ -68,12 +51,16 @@ namespace NullableReferenceTypesRewriter.ConsoleApplication
              && type.Keyword.Kind() == SyntaxKind.VoidKeyword;
     }
 
+    public static MethodDeclarationSyntax MakeNullReturning (MethodDeclarationSyntax method)
+    {
+      return method.WithReturnType (MakeNullable (method.ReturnType));
+    }
 
     public static TypeSyntax MakeNullable (TypeSyntax typeSyntax)
     {
       if (typeSyntax is NullableTypeSyntax)
         return typeSyntax;
-      var nullable = SyntaxFactory.NullableType (typeSyntax.WithoutTrailingTrivia());
+      var nullable = NullableType (typeSyntax.WithoutTrailingTrivia());
       return nullable
           .WithTrailingTrivia (typeSyntax.GetTrailingTrivia());
     }
