@@ -4,37 +4,11 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace NullableTypeSetter.ConsoleApplication
+namespace NullableReferenceTypesRewriter.ConsoleApplication
 {
- public class MethodNullAnnotator : CSharpSyntaxRewriter
+  public static class NullUtilities
   {
-    private SemanticModel _semanticModel;
-
-    public MethodNullAnnotator (SemanticModel semanticModel)
-    {
-      _semanticModel = semanticModel;
-    }
-
-    public override SyntaxNode? VisitMethodDeclaration (MethodDeclarationSyntax node)
-    {
-      if (DoesReturnVoid (node))
-        return node;
-      if (node.Body == null)
-        return node;
-      if (node.Body?.Statements.Count == 0)
-        return node;
-
-      var retrunsNull = HasCanBeNullAttribute (node)
-                        || ReturnsNull (node, _semanticModel);
-
-      if (!retrunsNull)
-        return node;
-
-      return node.WithReturnType (
-          MakeNullable (node.ReturnType));
-    }
-
-    private static bool ReturnsNull (MethodDeclarationSyntax node, SemanticModel semanticModel)
+    public static bool ReturnsNull (MethodDeclarationSyntax node, SemanticModel semanticModel)
     {
       var returnStatements = semanticModel.AnalyzeControlFlow (
               node.Body?.Statements.First(),
@@ -46,26 +20,25 @@ namespace NullableTypeSetter.ConsoleApplication
                   && IsDefinitlyNull (returnStatement.Expression!, semanticModel));
     }
 
-    private static bool HasCanBeNullAttribute (MethodDeclarationSyntax node)
-    {
-      return node.AttributeLists.SelectMany (list => list.Attributes)
-          .Any (attr => attr.Name.ToString().EndsWith ("CanBeNull"));
-    }
-
-    private static bool DoesReturnVoid (MethodDeclarationSyntax node)
-    {
-      return node.ReturnType is PredefinedTypeSyntax type
-             && type.Keyword.Kind() == SyntaxKind.VoidKeyword;
-    }
-
     public static bool IsDefinitlyNull (ExpressionSyntax expression, SemanticModel semanticModel)
     {
       var typeInfo = semanticModel.GetTypeInfo (expression);
 
-      if (typeInfo.Nullability.FlowState != NullableFlowState.None
-          || typeInfo.Nullability.Annotation == NullableAnnotation.Annotated)
+      if (typeInfo.Nullability.FlowState == NullableFlowState.NotNull)
       {
-        Console.WriteLine (expression);
+        Console.WriteLine ($"NOT NULL:    {expression}");
+        return false;
+      }
+
+      if (typeInfo.Nullability.FlowState == NullableFlowState.MaybeNull)
+      {
+        Console.WriteLine ($"MAYBE NULL:  {expression}");
+        return true;
+      }
+
+      if (typeInfo.Nullability.FlowState == NullableFlowState.None)
+      {
+        Console.WriteLine ($"UNDECIDED:   {expression}");
       }
 
       return expression switch
@@ -88,6 +61,13 @@ namespace NullableTypeSetter.ConsoleApplication
 
       return method.DeclaringSyntaxReferences.Any (syntaxRef => DoesReturnVoid ((MethodDeclarationSyntax) syntaxRef.GetSyntax()));
     }
+
+    public static bool DoesReturnVoid (MethodDeclarationSyntax node)
+    {
+      return node.ReturnType is PredefinedTypeSyntax type
+             && type.Keyword.Kind() == SyntaxKind.VoidKeyword;
+    }
+
 
     public static TypeSyntax MakeNullable (TypeSyntax typeSyntax)
     {
