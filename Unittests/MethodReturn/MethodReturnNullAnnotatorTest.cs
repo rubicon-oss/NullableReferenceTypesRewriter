@@ -20,29 +20,27 @@ namespace NullableReferenceTypesRewriter.Unittests.MethodReturn
 {
   public class MethodReturnNullAnnotatorTest
   {
-    private const string c_template = "%TEMPLATE%";
-
     private const string c_classTemplate =
         @"public class TestClass
-{
-  private object? NullableAnnotatedReferenceMethod() { return null; }
-  private object  NonNullableReferenceMethod() { return new object(); }
+{{
+  private object? NullableAnnotatedReferenceMethod() {{ return null; }}
+  private object  NonNullableReferenceMethod() {{ return new object(); }}
 
-  private int     NullableValueMethod() { return null; }
-  private int     NonNullableValueMethod() { return 1; }
+  private int     NullableValueMethod() {{ return null; }}
+  private int     NonNullableValueMethod() {{ return 1; }}
 
-  private object  NonNullableBoxedValueMethod() { return 1; }
-  private object? NullableBoxedValueMethod() { return 1; }
+  private object  NonNullableBoxedValueMethod() {{ return 1; }}
+  private object? NullableBoxedValueMethod() {{ return 1; }}
 
-  %TEMPLATE%
-}";
+  {0}
+}}";
 
     [Test]
     [TestCase ("object t() { return null; }")]
     [TestCase ("object t(int i) { if (i == 1) { return null; } else { return new object();} }")]
     public void MethodNullReturnAnnotator_AnnotatesNullLiteralReturningMethod (string methodSource)
     {
-      var source = c_classTemplate.Replace (c_template, methodSource);
+      var source = string.Format (c_classTemplate, methodSource);
       var (model, syntax) = CompiledSourceFileProvider.CompileMethodInClass (source, "t");
       var rewriter = new MethodReturnNullAnnotator (model);
 
@@ -58,7 +56,7 @@ namespace NullableReferenceTypesRewriter.Unittests.MethodReturn
     [TestCase ("object t(int i) { if (i == 1) { return NullableAnnotatedReferenceMethod(); } else { return new object();} }")]
     public void MethodNullReturnAnnotator_AnnotatesNullableAnnotatedReturningMethod (string methodSource)
     {
-      var source = c_classTemplate.Replace (c_template, methodSource);
+      var source = string.Format (c_classTemplate, methodSource);
       var (model, syntax) = CompiledSourceFileProvider.CompileMethodInClass (source, "t");
       var rewriter = new MethodReturnNullAnnotator (model);
 
@@ -74,7 +72,7 @@ namespace NullableReferenceTypesRewriter.Unittests.MethodReturn
     [TestCase ("object t() { return NonNullableBoxedValueMethod(); }")]
     public void MethodNullReturnAnnotator_DoesNotAnnotateNonNullReturningMethod (string methodSource)
     {
-      var source = c_classTemplate.Replace (c_template, methodSource);
+      var source = string.Format (c_classTemplate, methodSource);
       var (model, syntax) = CompiledSourceFileProvider.CompileMethodInClass (source, "t");
       var rewriter = new MethodReturnNullAnnotator (model);
 
@@ -89,7 +87,7 @@ namespace NullableReferenceTypesRewriter.Unittests.MethodReturn
     [TestCase ("[CanBeNull] object t() { return new object(); }")]
     public void MethodNullReturnAnnotator_DoesAnnotateMethodsWithCanBeNulllAttribute (string methodSource)
     {
-      var source = c_classTemplate.Replace (c_template, methodSource);
+      var source = string.Format (c_classTemplate, methodSource);
       var (model, syntax) = CompiledSourceFileProvider.CompileMethodInClass (source, "t");
       var rewriter = new MethodReturnNullAnnotator (model);
 
@@ -102,7 +100,7 @@ namespace NullableReferenceTypesRewriter.Unittests.MethodReturn
     [TestCase ("void object t() { return 0 == 0 ? new object() : null; }")]
     public void MethodNullReturnAnnotator_DoesNotAnnotateProvablyNonNullReturningMehtods (string methodSource)
     {
-      var source = c_classTemplate.Replace (c_template, methodSource);
+      var source = string.Format (c_classTemplate, methodSource);
       var (model, syntax) = CompiledSourceFileProvider.CompileMethodInClass (source, "t");
       var rewriter = new MethodReturnNullAnnotator (model);
 

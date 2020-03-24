@@ -20,19 +20,17 @@ namespace NullableReferenceTypesRewriter.Unittests.CastExpression
 {
   public class CastExpressionNullAnnotatorTest
   {
-    private const string c_template = "%TEMPLATE%";
-
     private const string c_castTemplate =
-        "public void Test() { " +
-        "var a = %TEMPLATE%;" +
-        "}";
+        "public void Test() {{ " +
+        "var a = {0};" +
+        "}}";
 
     [Test]
     [TestCase ("(object) new object()")]
     [TestCase ("(string) new object()")]
     public void CastExpressionNullAnnotator_DoesNotAnnotateNonNullableCast (string castExpression)
     {
-      var source = c_castTemplate.Replace (c_template, castExpression);
+      var source = string.Format (c_castTemplate, castExpression);
       var (semanticModel, method) = CompiledSourceFileProvider.CompileMethod (source);
       var stmt = (method.Body!.Statements.First() as LocalDeclarationStatementSyntax)!;
       var castExpressionSyntax = (stmt.Declaration.Variables.First().Initializer!.Value as CastExpressionSyntax)!;
@@ -50,7 +48,7 @@ namespace NullableReferenceTypesRewriter.Unittests.CastExpression
     [TestCase ("(string) (new System.Random().Next() < 0 ? null : new object())")]
     public void CastExpressionNullAnnotator_DoesAnnotateNullableCast (string castExpression)
     {
-      var source = c_castTemplate.Replace (c_template, castExpression);
+      var source = string.Format (c_castTemplate, castExpression);
       var (semanticModel, method) = CompiledSourceFileProvider.CompileMethod (source);
       var stmt = (method.Body!.Statements.First() as LocalDeclarationStatementSyntax)!;
       var castExpressionSyntax = (stmt.Declaration.Variables.First().Initializer!.Value as CastExpressionSyntax)!;
