@@ -13,10 +13,10 @@
 
 using System;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using NullableReferenceTypesRewriter.ConsoleApplication.MethodReturn;
+using NullableReferenceTypesRewriter.MethodReturn;
 using NUnit.Framework;
 
-namespace NUnit2To3SyntaxConverter.Unittests.MethodReturn
+namespace NullableReferenceTypesRewriter.Unittests.MethodReturn
 {
   public class MethodReturnNullAnnotatorTest
   {

@@ -14,10 +14,10 @@
 using System;
 using System.Linq;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using NullableReferenceTypesRewriter.ConsoleApplication.LocalDeclaration;
+using NullableReferenceTypesRewriter.LocalDeclaration;
 using NUnit.Framework;
 
-namespace NUnit2To3SyntaxConverter.Unittests.LocalDeclaration
+namespace NullableReferenceTypesRewriter.Unittests.LocalDeclaration
 {
   public class LocalDeclarationNullAnnotatorTest
   {
@@ -33,7 +33,6 @@ namespace NUnit2To3SyntaxConverter.Unittests.LocalDeclaration
       var rewritten = rewriter.Visit (syntax) as LocalDeclarationStatementSyntax;
 
       Assert.That (rewritten, Is.Not.Null);
-
       Assert.That (rewritten, Is.EqualTo (syntax));
     }
 
@@ -49,7 +48,6 @@ namespace NUnit2To3SyntaxConverter.Unittests.LocalDeclaration
       var rewritten = rewriter.Visit (syntax) as LocalDeclarationStatementSyntax;
 
       Assert.That (rewritten, Is.Not.Null);
-
       Assert.That (rewritten!.Declaration.Type, Is.InstanceOf<NullableTypeSyntax>());
     }
 

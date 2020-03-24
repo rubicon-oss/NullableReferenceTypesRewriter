@@ -20,11 +20,11 @@ using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.MSBuild;
-using NullableReferenceTypesRewriter.ConsoleApplication.CastExpression;
-using NullableReferenceTypesRewriter.ConsoleApplication.LocalDeclaration;
-using NullableReferenceTypesRewriter.ConsoleApplication.MethodArguments;
-using NullableReferenceTypesRewriter.ConsoleApplication.MethodReturn;
-using NullableReferenceTypesRewriter.ConsoleApplication.Utilities;
+using NullableReferenceTypesRewriter.CastExpression;
+using NullableReferenceTypesRewriter.LocalDeclaration;
+using NullableReferenceTypesRewriter.MethodArguments;
+using NullableReferenceTypesRewriter.MethodReturn;
+using NullableReferenceTypesRewriter.Utilities;
 
 namespace NullableReferenceTypesRewriter.ConsoleApplication
 {

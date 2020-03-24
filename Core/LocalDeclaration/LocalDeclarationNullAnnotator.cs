@@ -12,42 +12,40 @@
 //
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using NullableReferenceTypesRewriter.ConsoleApplication.Utilities;
+using NullableReferenceTypesRewriter.Utilities;
 
-namespace NullableReferenceTypesRewriter.ConsoleApplication.MethodArguments
+namespace NullableReferenceTypesRewriter.LocalDeclaration
 {
-  public class MethodParameterNullAnnotator : CSharpSyntaxRewriter
+  public class LocalDeclarationNullAnnotator : CSharpSyntaxRewriter
   {
-    private readonly IReadOnlyCollection<ParameterSyntax> _nullableParameters;
+    private readonly SemanticModel _semanticModel;
 
-    public MethodParameterNullAnnotator (IReadOnlyCollection<ParameterSyntax> nullableParameters)
+    public LocalDeclarationNullAnnotator (SemanticModel semanticModel)
     {
-      _nullableParameters = nullableParameters;
+      _semanticModel = semanticModel;
     }
 
-    public override SyntaxNode? VisitMethodDeclaration (MethodDeclarationSyntax node)
+    public override SyntaxNode? VisitLocalDeclarationStatement (LocalDeclarationStatementSyntax node)
     {
-      var newParameters = node.ParameterList.Parameters;
+      if (node.Declaration.Type.IsVar)
+        return node;
 
-      foreach (var parameter in node.ParameterList.Parameters)
-      {
-        if (_nullableParameters.Contains (parameter))
-        {
-          if (parameter.Type == null)
-            continue;
+      if (node.Declaration.Type is NullableTypeSyntax)
+        return node;
 
-          var toReplace = newParameters.SingleOrDefault (param => param.Identifier.ToString() == parameter.Identifier.ToString());
-          if (toReplace.Type != null)
-            newParameters = newParameters.Replace (toReplace, toReplace.WithType (NullUtilities.MakeNullable (toReplace.Type)));
-        }
-      }
+      var type = node.Declaration.Type;
 
-      return node.WithParameterList (node.ParameterList.WithParameters (newParameters));
+      var isNullable = node.Declaration.Variables
+          .Where (variable => variable.Initializer != null)
+          .Any (variable => NullUtilities.CanBeNull (variable.Initializer!.Value, _semanticModel));
+
+      return isNullable
+          ? node.WithDeclaration (node.Declaration.WithType (NullUtilities.ToNullable (type)))
+          : node;
     }
   }
 }

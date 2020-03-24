@@ -18,7 +18,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NUnit.Framework;
 
-namespace NUnit2To3SyntaxConverter.Unittests
+namespace NullableReferenceTypesRewriter.Unittests
 {
   public static class CompiledSourceFileProvider
   {

@@ -16,9 +16,9 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using NullableReferenceTypesRewriter.ConsoleApplication.Utilities;
+using NullableReferenceTypesRewriter.Utilities;
 
-namespace NullableReferenceTypesRewriter.ConsoleApplication.MethodArguments
+namespace NullableReferenceTypesRewriter.MethodArguments
 {
   public class MethodArgumentFromInvocationNullAnnotator : CSharpSyntaxRewriter
   {
@@ -34,8 +34,8 @@ namespace NullableReferenceTypesRewriter.ConsoleApplication.MethodArguments
     public override SyntaxNode? VisitInvocationExpression (InvocationExpressionSyntax node)
     {
       var nullableArguments = node.ArgumentList.Arguments
-          .Select ((arg, index) => (arg, index))
-          .Where (arg => NullUtilities.CanBeNull (arg.arg.Expression, _semanticModel))
+          .Select ((arg, index) => (Argument: arg, Index: index))
+          .Where (indexedArg => NullUtilities.CanBeNull (indexedArg.Argument.Expression, _semanticModel))
           .ToList();
 
       if (nullableArguments.Count == 0)
@@ -43,15 +43,16 @@ namespace NullableReferenceTypesRewriter.ConsoleApplication.MethodArguments
 
       var methodDeclaration = _semanticModel.GetSymbolInfo (node);
 
-      var methodSyntax = (MethodDeclarationSyntax?) methodDeclaration.Symbol?.DeclaringSyntaxReferences.FirstOrDefault()
-          ?.GetSyntaxAsync()?.GetAwaiter().GetResult();
+      var methodSyntax = (MethodDeclarationSyntax?) methodDeclaration.Symbol?.DeclaringSyntaxReferences
+          .FirstOrDefault()?
+          .GetSyntaxAsync()?.GetAwaiter().GetResult();
 
       if (methodSyntax == null)
         return node;
 
-      foreach (var argument in nullableArguments)
+      foreach (var indexedArg in nullableArguments)
       {
-        var nullableParameter = methodSyntax.ParameterList.Parameters[argument.index];
+        var nullableParameter = methodSyntax.ParameterList.Parameters[indexedArg.Index];
         _parameterCallback (nullableParameter);
       }
 

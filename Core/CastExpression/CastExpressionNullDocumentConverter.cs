@@ -15,18 +15,20 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 
-namespace NullableReferenceTypesRewriter.ConsoleApplication.CastExpression
+namespace NullableReferenceTypesRewriter.CastExpression
 {
   public class CastExpressionNullDocumentConverter : IDocumentConverter
   {
-    public async Task<Document> Convert (Document doc)
+    public async Task<Document> Convert (Document document)
     {
-      var semantic = await doc.GetSemanticModelAsync();
-      var syntax = await doc.GetSyntaxRootAsync();
+      var semantic = await document.GetSemanticModelAsync()
+                     ?? throw new ArgumentException ($"Document '{document.FilePath}' does not support providing a semantic model.");
+      var syntax = await document.GetSyntaxRootAsync()
+                   ?? throw new ArgumentException ($"Document '{document.FilePath}' does not support providing a syntax tree.");
 
-      var newSyntax = new CastExpressionNullAnnotator (semantic!).Visit (syntax!);
+      var newSyntax = new CastExpressionNullAnnotator (semantic).Visit (syntax);
 
-      return doc.WithSyntaxRoot (newSyntax);
+      return document.WithSyntaxRoot (newSyntax);
     }
   }
 }

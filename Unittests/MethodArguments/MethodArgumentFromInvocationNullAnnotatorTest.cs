@@ -14,10 +14,10 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using NullableReferenceTypesRewriter.ConsoleApplication.MethodArguments;
+using NullableReferenceTypesRewriter.MethodArguments;
 using NUnit.Framework;
 
-namespace NUnit2To3SyntaxConverter.Unittests.MethodArguments
+namespace NullableReferenceTypesRewriter.Unittests.MethodArguments
 {
   public class MethodArgumentFromInvocationNullAnnotatorTest
   {
@@ -25,21 +25,21 @@ namespace NUnit2To3SyntaxConverter.Unittests.MethodArguments
 
     private const string c_argumentTemplate =
         @"public class ArgumentTest
-{
+{{
   public void TestMethod (int structType, object referenceType1, double structType2, string referenceType2)
-  {
-  }
+  {{
+  }}
 
   public void CallSite ()
-  {
-    %TEMPLATE%;
-  }
-}";
+  {{
+    {0};
+  }}
+}}";
 
     [Test]
     public void MethodArgumentFromInvocationNullAnnotator_InvokesCallbackWithSingleNullableArgument ()
     {
-      var source = c_argumentTemplate.Replace (c_template, "TestMethod (1, null, 2.3, new string())");
+      var source = string.Format (c_argumentTemplate, "TestMethod (1, null, 2.3, new string())");
       var (semanticModel, classSyntax) = CompiledSourceFileProvider.CompileClass (source);
       var callSiteMethod = classSyntax.Members[1] as MethodDeclarationSyntax;
       var list = new List<ParameterSyntax>();
@@ -55,7 +55,7 @@ namespace NUnit2To3SyntaxConverter.Unittests.MethodArguments
     [Test]
     public void MethodArgumentFromInvocationNullAnnotator_InvokesCallbackWithMultipleNullableArgument ()
     {
-      var source = c_argumentTemplate.Replace (c_template, "TestMethod (1, null, 2.3, null)");
+      var source = string.Format (c_argumentTemplate, "TestMethod (1, null, 2.3, null)");
       var (semanticModel, classSyntax) = CompiledSourceFileProvider.CompileClass (source);
       var callSiteMethod = classSyntax.Members[1] as MethodDeclarationSyntax;
       var list = new List<ParameterSyntax>();

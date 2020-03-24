@@ -12,13 +12,31 @@
 //
 
 using System;
-using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using NullableReferenceTypesRewriter.Utilities;
 
-namespace NullableReferenceTypesRewriter.ConsoleApplication
+namespace NullableReferenceTypesRewriter.CastExpression
 {
-  public interface IDocumentConverter
+  public class CastExpressionNullAnnotator : CSharpSyntaxRewriter
   {
-    Task<Document> Convert (Document doc);
+    private readonly SemanticModel _semanticModel;
+
+    public CastExpressionNullAnnotator (SemanticModel semanticModel)
+    {
+      _semanticModel = semanticModel;
+    }
+
+    public override SyntaxNode? VisitCastExpression (CastExpressionSyntax node)
+    {
+      var type = node.Type;
+      if (type is NullableTypeSyntax)
+        return node;
+
+      return NullUtilities.CanBeNull (node.Expression, _semanticModel)
+          ? node.WithType (NullUtilities.ToNullable (type))
+          : node;
+    }
   }
 }

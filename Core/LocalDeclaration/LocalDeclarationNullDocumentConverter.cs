@@ -12,21 +12,21 @@
 //
 
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 
-namespace NullableReferenceTypesRewriter.ConsoleApplication.Utilities
+namespace NullableReferenceTypesRewriter.LocalDeclaration
 {
-  public static class ConverterUtilities
+  public class LocalDeclarationNullDocumentConverter : IDocumentConverter
   {
-    public static async Task<Document> ApplyAll (Document doc, IEnumerable<IDocumentConverter> converters)
+    public async Task<Document> Convert (Document document)
     {
-      var document = doc;
-      foreach (var converter in converters)
-        document = await converter.Convert (document);
+      var semantic = await document.GetSemanticModelAsync();
+      var syntax = await document.GetSyntaxRootAsync();
 
-      return document;
+      var newSyntax = new LocalDeclarationNullAnnotator (semantic!).Visit (syntax!);
+
+      return document.WithSyntaxRoot (newSyntax);
     }
   }
 }

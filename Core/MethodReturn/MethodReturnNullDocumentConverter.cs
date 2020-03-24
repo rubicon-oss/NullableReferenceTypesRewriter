@@ -15,16 +15,16 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 
-namespace NullableReferenceTypesRewriter.ConsoleApplication.LocalDeclaration
+namespace NullableReferenceTypesRewriter.MethodReturn
 {
-  public class LocalDeclarationNullDocumentConverter : IDocumentConverter
+  public class MethodReturnNullDocumentConverter : IDocumentConverter
   {
     public async Task<Document> Convert (Document doc)
     {
       var semantic = await doc.GetSemanticModelAsync();
       var syntax = await doc.GetSyntaxRootAsync();
 
-      var newSyntax = new LocalDeclarationNullAnnotator (semantic!).Visit (syntax!);
+      var newSyntax = new MethodReturnNullAnnotator (semantic!).Visit (syntax!);
 
       return doc.WithSyntaxRoot (newSyntax);
     }

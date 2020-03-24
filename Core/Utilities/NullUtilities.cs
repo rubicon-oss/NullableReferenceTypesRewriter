@@ -18,7 +18,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace NullableReferenceTypesRewriter.ConsoleApplication.Utilities
+namespace NullableReferenceTypesRewriter.Utilities
 {
   public static class NullUtilities
   {
@@ -45,18 +45,18 @@ namespace NullableReferenceTypesRewriter.ConsoleApplication.Utilities
       };
     }
 
-    public static bool DoesReturnVoid (MethodDeclarationSyntax node)
+    public static bool ReturnsVoid (MethodDeclarationSyntax node)
     {
       return node.ReturnType is PredefinedTypeSyntax type
              && type.Keyword.Kind() == SyntaxKind.VoidKeyword;
     }
 
-    public static MethodDeclarationSyntax MakeNullReturning (MethodDeclarationSyntax method)
+    public static MethodDeclarationSyntax ToNullReturning (MethodDeclarationSyntax method)
     {
-      return method.WithReturnType (MakeNullable (method.ReturnType));
+      return method.WithReturnType (ToNullable (method.ReturnType));
     }
 
-    public static TypeSyntax MakeNullable (TypeSyntax typeSyntax)
+    public static TypeSyntax ToNullable (TypeSyntax typeSyntax)
     {
       if (typeSyntax is NullableTypeSyntax)
         return typeSyntax;

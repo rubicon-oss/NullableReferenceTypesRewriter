@@ -13,10 +13,10 @@
 
 using System;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using NullableReferenceTypesRewriter.ConsoleApplication.CastExpression;
+using NullableReferenceTypesRewriter.CastExpression;
 using NUnit.Framework;
 
-namespace NUnit2To3SyntaxConverter.Unittests.CastExpression
+namespace NullableReferenceTypesRewriter.Unittests.CastExpression
 {
   public class CastExpressionNullAnnotatorTest
   {
@@ -59,8 +59,10 @@ namespace NUnit2To3SyntaxConverter.Unittests.CastExpression
       var rewritten = rewriter.Visit (castExpressionSyntax);
 
       Assert.That (rewritten, Is.InstanceOf<CastExpressionSyntax>());
-      var rewrittenCastExpression = rewritten as CastExpressionSyntax;
-      Assert.That (rewrittenCastExpression!.Type, Is.InstanceOf<NullableTypeSyntax>());
+      var rewrittenCastExpression = (rewritten as CastExpressionSyntax)!;
+      Assert.That (rewrittenCastExpression.Type, Is.InstanceOf<NullableTypeSyntax>());
+      Assert.That ((rewrittenCastExpression.Type as NullableTypeSyntax)!.ToString(), Is.EqualTo (castExpressionSyntax.Type + "?"));
+      Assert.That (rewrittenCastExpression.Expression.ToFullString(), Is.EqualTo (castExpressionSyntax.Expression.ToFullString()));
     }
   }
 }

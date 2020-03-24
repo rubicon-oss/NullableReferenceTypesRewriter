@@ -2,7 +2,9 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApplication", "ConsoleApplication\ConsoleApplication.csproj", "{7145B38F-8464-4516-951C-726C5452F74F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unittests", "Unittests\Unittests.csproj", "{BCE3FC9D-77B7-4510-A72C-0AB3B9CADD1B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "Unittests\UnitTests.csproj", "{BCE3FC9D-77B7-4510-A72C-0AB3B9CADD1B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core", "Core\Core.csproj", "{02715412-2C49-42B1-9EFF-AA85BC08FFDF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,5 +20,9 @@ Global
 		{BCE3FC9D-77B7-4510-A72C-0AB3B9CADD1B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BCE3FC9D-77B7-4510-A72C-0AB3B9CADD1B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BCE3FC9D-77B7-4510-A72C-0AB3B9CADD1B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{02715412-2C49-42B1-9EFF-AA85BC08FFDF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{02715412-2C49-42B1-9EFF-AA85BC08FFDF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{02715412-2C49-42B1-9EFF-AA85BC08FFDF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{02715412-2C49-42B1-9EFF-AA85BC08FFDF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
