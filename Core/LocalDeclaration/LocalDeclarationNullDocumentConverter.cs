@@ -21,10 +21,12 @@ namespace NullableReferenceTypesRewriter.LocalDeclaration
   {
     public async Task<Document> Convert (Document document)
     {
-      var semantic = await document.GetSemanticModelAsync();
-      var syntax = await document.GetSyntaxRootAsync();
+      var semantic = await document.GetSemanticModelAsync()
+                     ?? throw new ArgumentException ($"Document '{document.FilePath}' does not support providing a semantic model.");
+      var syntax = await document.GetSyntaxRootAsync()
+                   ?? throw new ArgumentException ($"Document '{document.FilePath}' does not support providing a syntax tree.");
 
-      var newSyntax = new LocalDeclarationNullAnnotator (semantic!).Visit (syntax!);
+      var newSyntax = new LocalDeclarationNullAnnotator (semantic).Visit (syntax);
 
       return document.WithSyntaxRoot (newSyntax);
     }

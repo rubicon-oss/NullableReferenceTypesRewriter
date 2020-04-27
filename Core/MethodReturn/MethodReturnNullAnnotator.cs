@@ -31,19 +31,19 @@ namespace NullableReferenceTypesRewriter.MethodReturn
 
     public override SyntaxNode? VisitMethodDeclaration (MethodDeclarationSyntax node)
     {
-      if (NullUtilities.ReturnsVoid (node)
-          || HasNullOrEmptyBody (node))
-      {
-        return node;
-      }
-
-      if (HasCanBeNullAttribute (node)
-          || NullUtilities.ReturnsNull (node, _semanticModel))
+      if (MayReturnNull(node, _semanticModel))
       {
         return NullUtilities.ToNullReturning (node);
       }
-
       return node;
+    }
+
+    private static bool MayReturnNull (MethodDeclarationSyntax node, SemanticModel model)
+    {
+      return !(NullUtilities.ReturnsVoid (node)
+               || HasNullOrEmptyBody (node))
+             && (HasCanBeNullAttribute (node)
+                 || NullUtilities.ReturnsNull (node, model));
     }
 
     private static bool HasNullOrEmptyBody (MethodDeclarationSyntax node)

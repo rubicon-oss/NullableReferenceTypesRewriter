@@ -19,9 +19,10 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace NullableReferenceTypesRewriter.MethodArguments
 {
-  /// <summary>
-  /// A DocumentConverter, which annotates methodArguments as nullable, if the method is called with null parameters.
-  /// Note: due to the implementation of DocumentConverters it is currently not possible to track methodcalls across documents (classes)
+  ///<summary>
+  /// A DocumentConverter, which annotates arguments of a method as nullable, if the method is called with <see langword="null" /> parameters.
+  /// Due to the implementation of DocumentConverters it is currently not possible to track method calls across documents (classes).
+  /// <see cref="IDocumentConverter"/>
   /// </summary>
   public class MethodArgumentFromInvocationNullDocumentConverter : IDocumentConverter
   {
