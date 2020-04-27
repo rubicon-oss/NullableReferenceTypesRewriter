@@ -18,7 +18,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NUnit.Framework;
 
-namespace NullableReferenceTypesRewriter.Unittests
+namespace NullableReferenceTypesRewriter.UnitTests
 {
   public static class CompiledSourceFileProvider
   {
@@ -34,12 +34,12 @@ namespace NullableReferenceTypesRewriter.Unittests
 
     public static (SemanticModel, MethodDeclarationSyntax) CompileMethod (string methodSource)
     {
-      var (sematicModel, syntaxNode) = CompileInClass ("TestClass", methodSource);
+      var (semanticModel, syntaxNode) = CompileInClass ("TestClass", methodSource);
       var methodDeclaration = syntaxNode.DescendantNodes()
           .OfType<MethodDeclarationSyntax>()
           .SingleOrDefault();
 
-      return (sematicModel, methodDeclaration);
+      return (semanticModel, methodDeclaration);
     }
 
     public static (SemanticModel, ClassDeclarationSyntax) CompileClass (string classSource)

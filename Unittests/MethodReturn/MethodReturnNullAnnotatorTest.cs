@@ -16,7 +16,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NullableReferenceTypesRewriter.MethodReturn;
 using NUnit.Framework;
 
-namespace NullableReferenceTypesRewriter.Unittests.MethodReturn
+namespace NullableReferenceTypesRewriter.UnitTests.MethodReturn
 {
   public class MethodReturnNullAnnotatorTest
   {
@@ -98,7 +98,7 @@ namespace NullableReferenceTypesRewriter.Unittests.MethodReturn
 
     [Test]
     [TestCase ("void object t() { return 0 == 0 ? new object() : null; }")]
-    public void MethodNullReturnAnnotator_DoesNotAnnotateProvablyNonNullReturningMehtods (string methodSource)
+    public void MethodNullReturnAnnotator_DoesNotAnnotateProvablyNonNullReturningMethods (string methodSource)
     {
       var source = string.Format (c_classTemplate, methodSource);
       var (model, syntax) = CompiledSourceFileProvider.CompileMethodInClass (source, "t");

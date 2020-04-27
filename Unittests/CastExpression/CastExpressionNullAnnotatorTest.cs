@@ -16,7 +16,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NullableReferenceTypesRewriter.CastExpression;
 using NUnit.Framework;
 
-namespace NullableReferenceTypesRewriter.Unittests.CastExpression
+namespace NullableReferenceTypesRewriter.UnitTests.CastExpression
 {
   public class CastExpressionNullAnnotatorTest
   {

@@ -17,7 +17,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NullableReferenceTypesRewriter.LocalDeclaration;
 using NUnit.Framework;
 
-namespace NullableReferenceTypesRewriter.Unittests.LocalDeclaration
+namespace NullableReferenceTypesRewriter.UnitTests.LocalDeclaration
 {
   public class LocalDeclarationNullAnnotatorTest
   {
@@ -54,7 +54,7 @@ namespace NullableReferenceTypesRewriter.Unittests.LocalDeclaration
     [Test]
     [TestCase ("string s = returnNull();")]
     [TestCase ("object o = returnNull();")]
-    public void LocalDecalrationNullAnnotator_DoesAnnotateDeclarationsCallingNullableMethods (string declarationSource)
+    public void LocalDeclarationNullAnnotator_DoesAnnotateDeclarationsCallingNullableMethods (string declarationSource)
     {
       var classContentTemplate =
           @"public string? returnNull() {

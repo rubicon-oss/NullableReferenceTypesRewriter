@@ -17,12 +17,10 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NullableReferenceTypesRewriter.MethodArguments;
 using NUnit.Framework;
 
-namespace NullableReferenceTypesRewriter.Unittests.MethodArguments
+namespace NullableReferenceTypesRewriter.UnitTests.MethodArguments
 {
   public class MethodArgumentFromInvocationNullAnnotatorTest
   {
-    private const string c_template = "%TEMPLATE%";
-
     private const string c_argumentTemplate =
         @"public class ArgumentTest
 {{
