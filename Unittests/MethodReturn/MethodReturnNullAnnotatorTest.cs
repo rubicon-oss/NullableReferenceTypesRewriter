@@ -85,7 +85,8 @@ namespace NullableReferenceTypesRewriter.UnitTests.MethodReturn
     [TestCase ("[CanBeNull] object t() { return null; }")]
     [TestCase ("[CanBeNull] object t() { return NonNullableReferenceMethod(); }")]
     [TestCase ("[CanBeNull] object t() { return new object(); }")]
-    public void MethodNullReturnAnnotator_DoesAnnotateMethodsWithCanBeNulllAttribute (string methodSource)
+    public void MethodNullReturnAnnotator_DoesAnnotateMethodsWithCanBeNullAttribute (string methodSource)
+
     {
       var source = string.Format (c_classTemplate, methodSource);
       var (model, syntax) = CompiledSourceFileProvider.CompileMethodInClass (source, "t");
