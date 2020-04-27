@@ -36,7 +36,7 @@ namespace NullableReferenceTypesRewriter.MethodArguments
 
       foreach (var parameter in node.ParameterList.Parameters)
       {
-        if (_nullableParameters.Contains (parameter))
+        if (ShouldBeNullableParameter (parameter))
         {
           if (parameter.Type == null)
             continue;
@@ -48,6 +48,19 @@ namespace NullableReferenceTypesRewriter.MethodArguments
       }
 
       return node.WithParameterList (node.ParameterList.WithParameters (newParameters));
+    }
+
+    private bool ShouldBeNullableParameter (ParameterSyntax parameter)
+    {
+      return _nullableParameters.Contains (parameter)
+             || HasCanBeNullAttribute (parameter);
+    }
+
+    private bool HasCanBeNullAttribute (ParameterSyntax parameter)
+    {
+      return parameter.AttributeLists
+          .SelectMany (attributes => attributes.Attributes)
+          .Any (attribute => attribute.Name.ToString() == "CanBeNull");
     }
   }
 }
