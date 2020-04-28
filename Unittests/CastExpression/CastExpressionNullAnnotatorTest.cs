@@ -18,6 +18,7 @@ using NUnit.Framework;
 
 namespace NullableReferenceTypesRewriter.UnitTests.CastExpression
 {
+  [TestFixture]
   public class CastExpressionNullAnnotatorTest
   {
     private const string c_castTemplate =

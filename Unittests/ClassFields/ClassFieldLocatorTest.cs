@@ -17,10 +17,11 @@ using NUnit.Framework;
 
 namespace NullableReferenceTypesRewriter.UnitTests.ClassFields
 {
+  [TestFixture]
   public class ClassFieldLocatorTest
   {
     [Test]
-    public void FieldLocator_LocatesSingleField ()
+    public void LocateFields_LocatesSingleField ()
     {
       var classSource =
           @"public class TestClass {
@@ -36,15 +37,14 @@ namespace NullableReferenceTypesRewriter.UnitTests.ClassFields
 
       Assert.That (fields, Has.One.Items);
       var field = fields.Single();
-      Assert.That (field.Type.ToString(), Is.EqualTo ("string"));
-      Assert.That (field.Variables, Has.One.Items);
-      Assert.That (field.Variables, Has.One.Items);
-      var variable = field.Variables.Single();
+      Assert.That (field.Declaration.Type.ToString(), Is.EqualTo ("string"));
+      Assert.That (field.Declaration.Variables, Has.One.Items);
+      var variable = field.Declaration.Variables.Single();
       Assert.That (variable.Identifier.ToString(), Is.EqualTo ("s"));
     }
 
     [Test]
-    public void FieldLocator_LocatesMultipleFields ()
+    public void LocateFields_LocatesMultipleFields ()
     {
       var classSource =
           @"public class TestClass {
@@ -63,7 +63,7 @@ namespace NullableReferenceTypesRewriter.UnitTests.ClassFields
     }
 
     [Test]
-    public void FieldLocator_LocatesNoFields ()
+    public void LocateFields_LocatesNoFields ()
     {
       var classSource =
           @"public class TestClass {
@@ -79,7 +79,7 @@ namespace NullableReferenceTypesRewriter.UnitTests.ClassFields
     }
 
     [Test]
-    public void FieldLocator_LocatesOnlyUnitializedFields ()
+    public void LocateFields_LocatesOnlyUnitializedFields ()
     {
       var classSource =
           @"public class TestClass {
@@ -96,15 +96,15 @@ namespace NullableReferenceTypesRewriter.UnitTests.ClassFields
 
       Assert.That (fields, Has.One.Items);
       var field = fields.Single();
-      Assert.That (field.Type.ToString(), Is.EqualTo ("string"));
-      Assert.That (field.Variables, Has.One.Items);
-      Assert.That (field.Variables, Has.One.Items);
-      var variable = field.Variables.Single();
+      Assert.That (field.Declaration.Type.ToString(), Is.EqualTo ("string"));
+      Assert.That (field.Declaration.Variables, Has.One.Items);
+      Assert.That (field.Declaration.Variables, Has.One.Items);
+      var variable = field.Declaration.Variables.Single();
       Assert.That (variable.Identifier.ToString(), Is.EqualTo ("s"));
     }
 
     [Test]
-    public void FieldLocator_LocatesFieldsInitializedToNull ()
+    public void LocateFields_LocatesFieldsInitializedToNull ()
     {
       var classSource =
           @"public class TestClass {
@@ -121,15 +121,14 @@ namespace NullableReferenceTypesRewriter.UnitTests.ClassFields
 
       Assert.That (fields, Has.One.Items);
       var field = fields.Single();
-      Assert.That (field.Type.ToString(), Is.EqualTo ("string"));
-      Assert.That (field.Variables, Has.One.Items);
-      Assert.That (field.Variables, Has.One.Items);
-      var variable = field.Variables.Single();
+      Assert.That (field.Declaration.Type.ToString(), Is.EqualTo ("string"));
+      Assert.That (field.Declaration.Variables, Has.One.Items);
+      var variable = field.Declaration.Variables.Single();
       Assert.That (variable.Identifier.ToString(), Is.EqualTo ("s"));
     }
 
     [Test]
-    public void FieldLocator_IgnoresValueTypes ()
+    public void LocateFields_IgnoresValueTypes ()
     {
       const string classSource = @"public class Test 
 {
@@ -147,9 +146,54 @@ namespace NullableReferenceTypesRewriter.UnitTests.ClassFields
 
       Assert.That (fields, Has.One.Items);
       var field = fields.Single();
-      Assert.That (field.Type.ToString(), Is.EqualTo ("string"));
-
+      Assert.That (field.Declaration.Type.ToString(), Is.EqualTo ("string"));
     }
 
+    [Test]
+    public void LocateFields_IgnoresReadonlyFields ()
+    {
+      var classSource =
+          @"public class TestClass 
+{
+  private readonly string readonly_s;
+  private string s;
+  
+  public TestClass() {
+  }
+}";
+      var (semanticModel, syntax) = CompiledSourceFileProvider.CompileClass (classSource);
+      var fieldLocator = new FieldLocator (syntax, semanticModel);
+
+      var fields = fieldLocator.LocateFields();
+      Assert.That (fields, Has.One.Items);
+      var field = fields.Single();
+      Assert.That (field.Declaration.Type.ToString(), Is.EqualTo ("string"));
+      Assert.That (field.Declaration.Variables, Has.One.Items);
+      var variable = field.Declaration.Variables.Single();
+      Assert.That (variable.Identifier.ToString(), Is.EqualTo ("s"));
+    }
+
+    [Test]
+    public void LocateFields_LocatesStaticFields ()
+    {
+      var classSource =
+          @"public class TestClass 
+{
+  private static string static_s;
+  
+  public TestClass() {
+  }
+}";
+      var (semanticModel, syntax) = CompiledSourceFileProvider.CompileClass (classSource);
+      var fieldLocator = new FieldLocator (syntax, semanticModel);
+
+      var fields = fieldLocator.LocateFields();
+      Assert.That (fields, Has.One.Items);
+      var field = fields.Single();
+      Assert.That (field.Declaration.Type.ToString(), Is.EqualTo ("string"));
+      Assert.That (field.Declaration.Variables, Has.One.Items);
+      var variable = field.Declaration.Variables.Single();
+      Assert.That (variable.Identifier.ToString(), Is.EqualTo ("static_s"));
+    }
   }
 }

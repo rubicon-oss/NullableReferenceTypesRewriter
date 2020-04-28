@@ -33,7 +33,7 @@ namespace NullableReferenceTypesRewriter.ClassFields
 
       var uninitializedFields = new ConstructorInitializationFilter (node, fields).GetUnitializedFields();
 
-      return new FieldNullaleAnnotator (node, uninitializedFields).AnnotateFields();
+      return new FieldNullableAnnotator (node, uninitializedFields).AnnotateFields();
     }
   }
 }

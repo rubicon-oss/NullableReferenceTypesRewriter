@@ -20,12 +20,12 @@ using NullableReferenceTypesRewriter.Utilities;
 
 namespace NullableReferenceTypesRewriter.ClassFields
 {
-  public class FieldNullaleAnnotator: CSharpSyntaxRewriter
+  public class FieldNullableAnnotator : CSharpSyntaxRewriter
   {
     private readonly ClassDeclarationSyntax _classDeclaration;
-    private readonly IReadOnlyCollection<VariableDeclarationSyntax> _uninitializedVariables;
+    private readonly IReadOnlyCollection<FieldDeclarationSyntax> _uninitializedVariables;
 
-    public FieldNullaleAnnotator (ClassDeclarationSyntax classDeclaration, IReadOnlyCollection<VariableDeclarationSyntax> uninitializedVariables)
+    public FieldNullableAnnotator (ClassDeclarationSyntax classDeclaration, IReadOnlyCollection<FieldDeclarationSyntax> uninitializedVariables)
     {
       _classDeclaration = classDeclaration;
       _uninitializedVariables = uninitializedVariables;
@@ -39,7 +39,7 @@ namespace NullableReferenceTypesRewriter.ClassFields
     public override SyntaxNode? VisitFieldDeclaration (FieldDeclarationSyntax node)
     {
 
-      if (_uninitializedVariables.Contains (node.Declaration))
+      if (_uninitializedVariables.Contains (node))
       {
         return node.WithDeclaration (
             node.Declaration.WithType (NullUtilities.ToNullable(node.Declaration.Type)));

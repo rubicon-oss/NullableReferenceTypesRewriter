@@ -18,9 +18,10 @@ using NUnit.Framework;
 
 namespace NullableReferenceTypesRewriter.UnitTests.ClassFields
 {
-  public class ConstructorInitializationTest
+  [TestFixture]
+  public class ConstructorInitializationFilterTest
   {
-    private string c_constructorTemplate =
+    private const string c_constructorTemplate =
         @"public class TestClass 
 {{
   private string field1;
@@ -40,7 +41,7 @@ namespace NullableReferenceTypesRewriter.UnitTests.ClassFields
   
 }}";
 
-    private string c_multipleConstructorTemplate =
+    private const string c_multipleConstructorTemplate =
         @"public class TestClass 
 {{
   private string field1;
@@ -64,8 +65,36 @@ namespace NullableReferenceTypesRewriter.UnitTests.ClassFields
   
 }}";
 
+    private const string c_multipleConstructorWithBaseCallTemplate =
+        @"public class TestClass : TestBase
+{{
+  private string field1;
+  private string field2;
+  private string field3;
+
+  public TestClass(string f1, string f2, string f3, string f4)
+    : base (f3, f4)
+  {{
+    {0}
+  }}
+}}";
+
+    private const string c_constructorStaticTemplate =
+        @"public class TestClass 
+{{
+  private string field1;
+  private string field2;
+  private static string field3;
+
+  public TestClass() 
+  {{
+    {0}
+  }}
+  
+}}";
+
     [Test]
-    public void ConstructorInitializationFilter_WithNoInitializations_FiltersNothing()
+    public void GetUnitializedFields_WithNoInitializations_FiltersNothing()
     {
       var (semantic, syntax) = CompiledSourceFileProvider.CompileClass (string.Format (c_constructorTemplate, "", ""));
       var (f1, f2, f3) = GetTestFields (syntax);
@@ -78,9 +107,9 @@ namespace NullableReferenceTypesRewriter.UnitTests.ClassFields
     }
 
     [Test]
-    public void ConstructorInitializationFilter_WithInitializerInOneCtor ()
+    public void GetUnitializedFields_WithInitializerInOneCtor ()
     {
-      var (semantic, syntax) = CompiledSourceFileProvider.CompileClass (string.Format (c_constructorTemplate, "", @"field1 = ""hello""; "));
+      var (_, syntax) = CompiledSourceFileProvider.CompileClass (string.Format (c_constructorTemplate, "", @"field1 = ""hello""; "));
       var (f1, f2, f3) = GetTestFields (syntax);
       var constructorInitFilter = new ConstructorInitializationFilter (syntax, new[] { f1, f2, f3 });
 
@@ -91,7 +120,20 @@ namespace NullableReferenceTypesRewriter.UnitTests.ClassFields
     }
 
     [Test]
-    public void ConstructorInitializationFilter_WithInitializerInCtorOverload_IsNotRecognized ()
+    public void GetUnitializedFields_WithBaseInitializer ()
+    {
+      var (_, syntax) = CompiledSourceFileProvider.CompileClass (string.Format (c_multipleConstructorWithBaseCallTemplate, @"field1 = ""hello""; "));
+      var (f1, f2, f3) = GetTestFields (syntax);
+      var constructorInitFilter = new ConstructorInitializationFilter (syntax, new[] { f1, f2, f3 });
+
+      var uninitialized = constructorInitFilter.GetUnitializedFields();
+
+      Assert.That (uninitialized, Has.Exactly (2).Items);
+      Assert.That (uninitialized, Is.EquivalentTo (new[] {f2, f3 }));
+    }
+
+    [Test]
+    public void GetUnitializedFields_WithInitializerInCtorOverload_IsNotRecognized ()
     {
       var (semantic, syntax) = CompiledSourceFileProvider.CompileClass (string.Format (c_constructorTemplate, @"field1 = ""hello""; ", @"field2 = """";"));
       var (f1, f2, f3) = GetTestFields (syntax);
@@ -104,7 +146,7 @@ namespace NullableReferenceTypesRewriter.UnitTests.ClassFields
     }
 
     [Test]
-    public void ConstructorInitializationFilter_WithMultipleValidCtors ()
+    public void GetUnitializedFields_WithMultipleValidCtors ()
     {
       var (semantic, syntax) = CompiledSourceFileProvider.CompileClass (string.Format (c_multipleConstructorTemplate,
           "field1 = \"hello\"; \r\n" +
@@ -128,7 +170,7 @@ namespace NullableReferenceTypesRewriter.UnitTests.ClassFields
     }
 
     [Test]
-    public void ConstructorInitializationFilter_WithMultipleValidCtors_MissingInitInOneCtor ()
+    public void GetUnitializedFields_WithMultipleValidCtors_MissingInitInOneCtor ()
     {
       var (semantic, syntax) = CompiledSourceFileProvider.CompileClass (string.Format (c_multipleConstructorTemplate,
           "field1 = \"hello\"; \r\n" +
@@ -152,7 +194,7 @@ namespace NullableReferenceTypesRewriter.UnitTests.ClassFields
     }
 
     [Test]
-    public void ConstructorInitializationFilter_WithMultipleValidCtors_MissingInitInMultipleCtors ()
+    public void GetUnitializedFields_WithMultipleValidCtors_MissingInitInMultipleCtors ()
     {
       var (semantic, syntax) = CompiledSourceFileProvider.CompileClass (string.Format (c_multipleConstructorTemplate,
           "field1 = \"hello\"; \r\n" +
@@ -173,9 +215,37 @@ namespace NullableReferenceTypesRewriter.UnitTests.ClassFields
       Assert.That (uninitialized, Is.EquivalentTo (new[] { f2, f3 }));
     }
 
-    private static (VariableDeclarationSyntax, VariableDeclarationSyntax, VariableDeclarationSyntax) GetTestFields (ClassDeclarationSyntax @class)
+    [Test]
+    public void GetUninitializedFields_WithStaticField ()
     {
-      var members = @class.Members.OfType<FieldDeclarationSyntax>().Select (f => f.Declaration).ToArray();
+      var (semantic, syntax) = CompiledSourceFileProvider.CompileClass (string.Format (c_constructorStaticTemplate, ""));
+      var (f1, f2, f3) = GetTestFields (syntax);
+      var constructorInitFilter = new ConstructorInitializationFilter (syntax, new[] { f1, f2, f3 });
+
+      var uninitialized = constructorInitFilter.GetUnitializedFields();
+
+      Assert.That (uninitialized, Has.Exactly (3).Items);
+      Assert.That (uninitialized, Is.EquivalentTo (new[] { f1, f2, f3 }));
+    }
+
+    [Test]
+    public void GetUninitializedFields_WithStaticFieldInitializedInCtor ()
+    {
+      var (semantic, syntax) = CompiledSourceFileProvider.CompileClass (string.Format (c_constructorStaticTemplate,
+          @"field1 = ""hello""; " +
+          @"field3 = ""hello""; "));
+      var (f1, f2, f3) = GetTestFields (syntax);
+      var constructorInitFilter = new ConstructorInitializationFilter (syntax, new[] { f1, f2, f3 });
+
+      var uninitialized = constructorInitFilter.GetUnitializedFields();
+
+      Assert.That (uninitialized, Has.Exactly (2).Items);
+      Assert.That (uninitialized, Is.EquivalentTo (new[] { f2, f3 }));
+    }
+
+    private static (FieldDeclarationSyntax, FieldDeclarationSyntax, FieldDeclarationSyntax) GetTestFields (ClassDeclarationSyntax @class)
+    {
+      var members = @class.Members.OfType<FieldDeclarationSyntax>().ToArray();
       return (members[0], members[1], members[2]);
     }
   }

@@ -16,6 +16,7 @@ using NUnit.Framework;
 
 namespace NullableReferenceTypesRewriter.UnitTests.ClassFields
 {
+  [TestFixture]
   public class ClassFieldNotInitializedAnnotatorTest
   {
     private const string c_classWithOneUnitializedField =

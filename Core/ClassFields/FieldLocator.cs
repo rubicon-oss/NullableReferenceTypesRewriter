@@ -25,7 +25,7 @@ namespace NullableReferenceTypesRewriter.ClassFields
   public class FieldLocator : CSharpSyntaxRewriter
   {
     private readonly ClassDeclarationSyntax _classDeclarationSyntax;
-    private readonly List<VariableDeclarationSyntax> _fieldDeclarations = new List<VariableDeclarationSyntax>();
+    private readonly List<FieldDeclarationSyntax> _fieldDeclarations = new List<FieldDeclarationSyntax>();
     private readonly SemanticModel _semanticModel;
 
     public FieldLocator (ClassDeclarationSyntax classDeclarationSyntax, SemanticModel semanticModel)
@@ -34,10 +34,10 @@ namespace NullableReferenceTypesRewriter.ClassFields
       _semanticModel = semanticModel;
     }
 
-    public ReadOnlyCollection<VariableDeclarationSyntax> LocateFields ()
+    public ReadOnlyCollection<FieldDeclarationSyntax> LocateFields ()
     {
       Visit (_classDeclarationSyntax);
-      return new ReadOnlyCollection<VariableDeclarationSyntax> (_fieldDeclarations);
+      return new ReadOnlyCollection<FieldDeclarationSyntax> (_fieldDeclarations);
     }
 
     public override SyntaxNode? VisitFieldDeclaration (FieldDeclarationSyntax node)
@@ -46,7 +46,7 @@ namespace NullableReferenceTypesRewriter.ClassFields
           && !DefinesValueTypeField(node.Declaration)
           && node.Declaration.Variables.All (v => HasNoInitializer (v) || IsInitializedToNull (v)))
       {
-        _fieldDeclarations.Add (node.Declaration);
+        _fieldDeclarations.Add (node);
       }
 
       return base.VisitFieldDeclaration (node);

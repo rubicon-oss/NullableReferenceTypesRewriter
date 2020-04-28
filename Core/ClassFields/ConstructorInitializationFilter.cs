@@ -19,46 +19,51 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace NullableReferenceTypesRewriter.ClassFields
 {
-  public class ConstructorInitializationFilter: CSharpSyntaxRewriter
+  public class ConstructorInitializationFilter : CSharpSyntaxRewriter
   {
     private readonly ClassDeclarationSyntax _classDeclaration;
-    private readonly IReadOnlyCollection<VariableDeclarationSyntax> _variables;
-    private readonly ISet<VariableDeclarationSyntax> _uninitializedVariables = new HashSet<VariableDeclarationSyntax>();
+    private readonly IReadOnlyCollection<FieldDeclarationSyntax> _fields;
+    private readonly ISet<FieldDeclarationSyntax> _uninitializedFields = new HashSet<FieldDeclarationSyntax>();
 
-    public ConstructorInitializationFilter (ClassDeclarationSyntax classDeclaration, IReadOnlyCollection<VariableDeclarationSyntax> variables)
+    public ConstructorInitializationFilter (ClassDeclarationSyntax classDeclaration, IReadOnlyCollection<FieldDeclarationSyntax> fields)
     {
       _classDeclaration = classDeclaration;
-      _variables = variables;
+      _fields = fields;
     }
 
     public override SyntaxNode? VisitConstructorDeclaration (ConstructorDeclarationSyntax node)
     {
-      if (node.Initializer != null)
+      if (node.Initializer != null && node.Initializer.ThisOrBaseKeyword.Text == "this")
         return node;
 
       var assignments = node.DescendantNodesAndSelf().OfType<AssignmentExpressionSyntax>().ToArray();
 
-      foreach (var variable in _variables)
+      foreach (var field in _fields)
       {
-        if(!IsParameterAssinged (assignments, variable))
+        if (IsStaticField (field)
+            || !IsParameterAssigned (assignments, field.Declaration))
         {
-          _uninitializedVariables.Add (variable);
+          _uninitializedFields.Add (field);
         }
       }
 
       return node;
     }
 
-    public IReadOnlyCollection<VariableDeclarationSyntax> GetUnitializedFields ()
+    public IReadOnlyCollection<FieldDeclarationSyntax> GetUnitializedFields ()
     {
       Visit (_classDeclaration);
-      return _uninitializedVariables.ToArray();
+      return _uninitializedFields.ToArray();
     }
 
-    private bool IsParameterAssinged (IEnumerable<AssignmentExpressionSyntax> assignments, VariableDeclarationSyntax variable)
+    private static bool IsStaticField (FieldDeclarationSyntax field)
+    {
+      return field.Modifiers.FirstOrDefault (mod => mod.Text == "static").Kind() != SyntaxKind.None;
+    }
+
+    private static bool IsParameterAssigned (IEnumerable<AssignmentExpressionSyntax> assignments, VariableDeclarationSyntax variable)
     {
       return assignments.FirstOrDefault (assingment => assingment.Left.ToString() == variable.Variables.First().Identifier.ValueText) != null;
     }
-
   }
 }
