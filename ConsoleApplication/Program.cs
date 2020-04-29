@@ -21,6 +21,8 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.MSBuild;
 using NullableReferenceTypesRewriter.CastExpression;
+using NullableReferenceTypesRewriter.ClassFields;
+using NullableReferenceTypesRewriter.Inheritance;
 using NullableReferenceTypesRewriter.LocalDeclaration;
 using NullableReferenceTypesRewriter.MethodArguments;
 using NullableReferenceTypesRewriter.MethodReturn;
@@ -44,19 +46,22 @@ namespace NullableReferenceTypesRewriter.ConsoleApplication
       var solution = await LoadSolutionSpace (solutionPath);
       var project = LoadProject (solution, projectName);
 
-      foreach (var document in project.Documents)
+      var documents = await new InheritanceProjectConverter().Convert(project.Documents);
+
+      foreach (var (oldDocument,document) in documents)
       {
         var convertedDocument = await ConverterUtilities.ApplyAll (
             document,
             new IDocumentConverter[]
             {
-                new MethodReturnNullDocumentConverter(),
-                new LocalDeclarationNullDocumentConverter(),
-                new CastExpressionNullDocumentConverter(),
-                new MethodArgumentFromInvocationNullDocumentConverter()
+               new MethodReturnNullDocumentConverter(),
+               new LocalDeclarationNullDocumentConverter(),
+               new CastExpressionNullDocumentConverter(),
+               new MethodArgumentFromInvocationNullDocumentConverter(),
+               new ClassFieldNotInitializedDocumentConverter(),
             });
 
-        await WriteChanges (document, convertedDocument);
+        await WriteChanges (oldDocument, convertedDocument);
       }
     }
 
