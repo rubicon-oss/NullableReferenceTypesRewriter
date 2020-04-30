@@ -21,9 +21,11 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.MSBuild;
 using NullableReferenceTypesRewriter.CastExpression;
+using NullableReferenceTypesRewriter.ClassFields;
 using NullableReferenceTypesRewriter.LocalDeclaration;
 using NullableReferenceTypesRewriter.MethodArguments;
 using NullableReferenceTypesRewriter.MethodReturn;
+using NullableReferenceTypesRewriter.Properties;
 using NullableReferenceTypesRewriter.Utilities;
 
 namespace NullableReferenceTypesRewriter.ConsoleApplication
@@ -53,7 +55,9 @@ namespace NullableReferenceTypesRewriter.ConsoleApplication
                 new MethodReturnNullDocumentConverter(),
                 new LocalDeclarationNullDocumentConverter(),
                 new CastExpressionNullDocumentConverter(),
-                new MethodArgumentFromInvocationNullDocumentConverter()
+                new MethodArgumentFromInvocationNullDocumentConverter(),
+                new PropertyNullAnnotatorDocumentConverter(),
+                new ClassFieldNotInitializedDocumentConverter(),
             });
 
         await WriteChanges (document, convertedDocument);
