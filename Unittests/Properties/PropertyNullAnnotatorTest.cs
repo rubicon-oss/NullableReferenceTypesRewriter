@@ -40,11 +40,12 @@ namespace NullableReferenceTypesRewriter.UnitTests.Properties
     }
 
     [Test]
-    public void PropertyAnnotator_WithBlockGetterRetursNull_AnnotatesNullable ()
+    [TestCase ("private string? _s; public string A { get { return _s; }; set {_s = value; }; } }")]
+    [TestCase ("public string A { get { return null; }; } }")]
+    [TestCase ("private string? T() { return null; } public string A { get { return T(); }; } }")]
+    public void PropertyAnnotator_WithBlockGetterReturnsNull_AnnotatesNullable (string classContent)
     {
-      var (semantic, syntax) = CompiledSourceFileProvider.CompileInClass (
-          "TestClass",
-          "private string? _s; public string A {get { if (_s == null) { return null; } return _s; }; set;}");
+      var (semantic, syntax) = CompiledSourceFileProvider.CompileInClass ("TestClass", classContent);
       var annotator = new PropertyNullAnnotator (semantic);
 
       var annotated = annotator.Visit (syntax);
@@ -63,9 +64,7 @@ namespace NullableReferenceTypesRewriter.UnitTests.Properties
         public string A { get; } = ""string"";")]
     public void PropertyAnnotator_WithInitializedAutoProperty_DoesNotAnnotateNullable (string classContent)
     {
-      var (semantic, syntax) = CompiledSourceFileProvider.CompileInClass (
-          "TestClass",
-          classContent);
+      var (semantic, syntax) = CompiledSourceFileProvider.CompileInClass ("TestClass", classContent);
       var annotator = new PropertyNullAnnotator (semantic);
 
       var annotated = annotator.Visit (syntax);
