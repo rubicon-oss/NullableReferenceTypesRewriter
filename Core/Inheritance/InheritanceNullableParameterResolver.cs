@@ -68,8 +68,8 @@ namespace NullableReferenceTypesRewriter.Inheritance
               if (method.ReturnNullableAnnotation == NullableAnnotation.Annotated)
                 set.Add ("#return");
 
-              foreach (var nullableParamter in NullableParamters (method.Parameters))
-                set.Add (nullableParamter.Name);
+              foreach (var nullableParameter in NullableParameters (method.Parameters))
+                set.Add (nullableParameter.Name);
               return set;
             });
         yield return (interfaceMethod.DeclaringSyntaxReferences.FirstOrDefault(), nullableImplementationParameters.ToArray());
@@ -85,7 +85,7 @@ namespace NullableReferenceTypesRewriter.Inheritance
             ? new[] { "#return" }
             : Enumerable.Empty<string>();
 
-        var nullableParameterNames = NullableParamters (interfaceMethod.Parameters)
+        var nullableParameterNames = NullableParameters (interfaceMethod.Parameters)
             .Select (param => param.Name).Concat (returnEnumerable)
             .ToArray();
         var implementationReferences = implementations.Select (impl => impl.DeclaringSyntaxReferences.FirstOrDefault()).ToArray();
@@ -97,7 +97,7 @@ namespace NullableReferenceTypesRewriter.Inheritance
       return list;
     }
 
-    private IEnumerable<IParameterSymbol> NullableParamters (IEnumerable<IParameterSymbol> parameters)
+    private IEnumerable<IParameterSymbol> NullableParameters (IEnumerable<IParameterSymbol> parameters)
     {
       return parameters.Where (p => p.NullableAnnotation == NullableAnnotation.Annotated);
     }
