@@ -20,27 +20,27 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace NullableReferenceTypesRewriter.Inheritance
 {
-  public class InheritanceParameterAnnotatorDocumentConverter: IDocumentConverter
+  public class InheritanceParameterAnnotatorDocumentConverter : IDocumentConverter
   {
-
     private readonly Dictionary<MethodDeclarationSyntax, string[]> _nullableInterfaces;
 
     public InheritanceParameterAnnotatorDocumentConverter (IEnumerable<(SyntaxReference, string[])> nullableMethodParameters)
     {
       _nullableInterfaces = nullableMethodParameters
-          .GroupBy(tup => tup.Item1)
-          .Select(grp => (grp.Key,  grp.Aggregate(new HashSet<string>(),
-              (set, impls) => {
-                foreach (var parameter in impls.Item2)
-                {
-                  set.Add (parameter);
-                }
-                return set;
-              } )))
-          .Select(t => (t.Key, t.Item2.ToArray()))
+          .GroupBy (tup => tup.Item1)
+          .Select (
+              grp => (grp.Key, grp.Aggregate (
+                  new HashSet<string>(),
+                  (set, impls) =>
+                  {
+                    foreach (var parameter in impls.Item2)
+                      set.Add (parameter);
+                    return set;
+                  })))
+          .Select (t => (t.Key, t.Item2.ToArray()))
           .ToDictionary (
-          tup => (MethodDeclarationSyntax) tup.Item1.GetSyntax(),
-          tup => tup.Item2);
+              tup => (MethodDeclarationSyntax) tup.Item1.GetSyntax(),
+              tup => tup.Item2);
     }
 
     public async Task<Document> Convert (Document document)
@@ -50,7 +50,7 @@ namespace NullableReferenceTypesRewriter.Inheritance
       var syntax = await document.GetSyntaxRootAsync()
                    ?? throw new ArgumentException ($"Document '{document.FilePath}' does not support providing a syntax tree.");
 
-      var newSyntax = new InheritanceParameterAnnotator(_nullableInterfaces).Visit(syntax);
+      var newSyntax = new InheritanceParameterAnnotator (_nullableInterfaces).Visit (syntax);
 
       return document.WithSyntaxRoot (newSyntax);
     }

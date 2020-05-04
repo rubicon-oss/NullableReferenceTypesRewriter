@@ -23,8 +23,8 @@ namespace NullableReferenceTypesRewriter.Inheritance
 {
   public class InheritanceParameterAnnotator : CSharpSyntaxRewriter
   {
-
     private readonly Dictionary<MethodDeclarationSyntax, string[]> _nullableInterfaces;
+
     public InheritanceParameterAnnotator (Dictionary<MethodDeclarationSyntax, string[]> nullableInterfaces)
     {
       _nullableInterfaces = nullableInterfaces;
@@ -32,23 +32,21 @@ namespace NullableReferenceTypesRewriter.Inheritance
 
     public override SyntaxNode? VisitMethodDeclaration (MethodDeclarationSyntax node)
     {
-
-      if(_nullableInterfaces.TryGetValue(node, out var parameterNames))
+      if (_nullableInterfaces.TryGetValue (node, out var parameterNames))
       {
         if (parameterNames.Contains ("#return"))
-        {
           node = node.WithReturnType (NullUtilities.ToNullable (node.ReturnType));
-        }
-        var newParameterList = parameterNames.Aggregate(node.ParameterList, ToNullableParameter);
+        var newParameterList = parameterNames.Aggregate (node.ParameterList, ToNullableParameter);
         return node.WithParameterList (newParameterList);
       }
+
       return base.VisitMethodDeclaration (node);
     }
 
 
     private ParameterListSyntax ToNullableParameter (ParameterListSyntax parameterListSyntax, string parameterName)
     {
-      var parameter = parameterListSyntax.Parameters.FirstOrDefault(param => param.Identifier.ToString() == parameterName);
+      var parameter = parameterListSyntax.Parameters.FirstOrDefault (param => param.Identifier.ToString() == parameterName);
 
       if (parameter == null)
         return parameterListSyntax;
@@ -57,6 +55,5 @@ namespace NullableReferenceTypesRewriter.Inheritance
 
       return parameterListSyntax.WithParameters (parameterListSyntax.Parameters.Replace (parameter, nullableParameter));
     }
-
   }
 }

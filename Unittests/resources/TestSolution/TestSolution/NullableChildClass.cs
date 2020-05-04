@@ -12,27 +12,14 @@
 //
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.CodeAnalysis;
 
-namespace NullableReferenceTypesRewriter.Inheritance
+namespace TestSolution
 {
-  public class InheritanceDocumentVisitor
+  public class ChildClass: BaseClass
   {
-    public async Task<IEnumerable<(SyntaxReference, string[])>> Visit (Document document)
+    public override string? BaseMethod (object? arg0, string arg1)
     {
-      var semantic = await document.GetSemanticModelAsync()
-                     ?? throw new ArgumentException ($"Document '{document.FilePath}' does not support providing a semantic model.");
-      var syntax = await document.GetSyntaxRootAsync()
-                   ?? throw new ArgumentException ($"Document '{document.FilePath}' does not support providing a syntax tree.");
-
-      var annotator = new InheritanceNullableParameterResolver (document, semantic);
-      annotator.Visit (syntax);
-
-      return annotator.GetNullableImplementationParameters()
-          .Concat (annotator.GetNullableInterfaceParameters());
+      throw new NotImplementedException();
     }
   }
 }

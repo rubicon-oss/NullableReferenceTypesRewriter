@@ -46,19 +46,19 @@ namespace NullableReferenceTypesRewriter.ConsoleApplication
       var solution = await LoadSolutionSpace (solutionPath);
       var project = LoadProject (solution, projectName);
 
-      var documents = await new InheritanceProjectConverter().Convert(project.Documents);
+      var documents = await new InheritanceProjectConverter().Convert (project.Documents);
 
-      foreach (var (oldDocument,document) in documents)
+      foreach (var (oldDocument, document) in documents)
       {
         var convertedDocument = await ConverterUtilities.ApplyAll (
             document,
             new IDocumentConverter[]
             {
-               new MethodReturnNullDocumentConverter(),
-               new LocalDeclarationNullDocumentConverter(),
-               new CastExpressionNullDocumentConverter(),
-               new MethodArgumentFromInvocationNullDocumentConverter(),
-               new ClassFieldNotInitializedDocumentConverter(),
+                new MethodReturnNullDocumentConverter(),
+                new LocalDeclarationNullDocumentConverter(),
+                new CastExpressionNullDocumentConverter(),
+                new MethodArgumentFromInvocationNullDocumentConverter(),
+                new ClassFieldNotInitializedDocumentConverter()
             });
 
         await WriteChanges (oldDocument, convertedDocument);

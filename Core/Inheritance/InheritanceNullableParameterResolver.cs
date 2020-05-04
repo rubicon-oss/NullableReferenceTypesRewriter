@@ -21,12 +21,14 @@ using Microsoft.CodeAnalysis.FindSymbols;
 
 namespace NullableReferenceTypesRewriter.Inheritance
 {
-  public class InheritanceNullableParameterResolver: CSharpSyntaxRewriter
+  public class InheritanceNullableParameterResolver : CSharpSyntaxRewriter
   {
     private readonly Document _document;
-    private readonly SemanticModel _semanticModel;
 
-    private readonly Dictionary<IMethodSymbol, IReadOnlyCollection<IMethodSymbol>> _interfaceImplementations = new Dictionary<IMethodSymbol, IReadOnlyCollection<IMethodSymbol>>();
+    private readonly Dictionary<IMethodSymbol, IReadOnlyCollection<IMethodSymbol>> _interfaceImplementations =
+        new Dictionary<IMethodSymbol, IReadOnlyCollection<IMethodSymbol>>();
+
+    private readonly SemanticModel _semanticModel;
 
     public InheritanceNullableParameterResolver (Document document, SemanticModel semanticModel)
     {
@@ -36,9 +38,9 @@ namespace NullableReferenceTypesRewriter.Inheritance
 
     public override SyntaxNode? VisitMethodDeclaration (MethodDeclarationSyntax node)
     {
-      var symbol = (IMethodSymbol) _semanticModel.GetDeclaredSymbol(node);
+      var symbol = (IMethodSymbol) _semanticModel.GetDeclaredSymbol (node);
 
-      var implementations =  SymbolFinder.FindImplementationsAsync (symbol, _document.Project.Solution).GetAwaiter().GetResult().Cast<IMethodSymbol>().ToArray();
+      var implementations = SymbolFinder.FindImplementationsAsync (symbol, _document.Project.Solution).GetAwaiter().GetResult().Cast<IMethodSymbol>().ToArray();
 
       if (implementations.Length == 0)
         implementations = SymbolFinder.FindOverridesAsync (symbol, _document.Project.Solution).GetAwaiter().GetResult()
@@ -47,33 +49,29 @@ namespace NullableReferenceTypesRewriter.Inheritance
       if (implementations.Length > 0)
       {
         if (_interfaceImplementations.TryGetValue (symbol, out var foundImplementations))
-        {
           _interfaceImplementations.Add (symbol, foundImplementations.Concat (implementations).ToArray());
-        }
         else
-        {
           _interfaceImplementations[symbol] = implementations;
-        }
       }
+
       return base.VisitMethodDeclaration (node);
     }
 
     public IEnumerable<(SyntaxReference, string[])> GetNullableInterfaceParameters ()
     {
-      foreach (var (interfaceMethod, implementations) in _interfaceImplementations.Select(kvp => (kvp.Key, kvp.Value)))
+      foreach (var (interfaceMethod, implementations) in _interfaceImplementations.Select (kvp => (kvp.Key, kvp.Value)))
       {
-        var nullableImplementationParameters = implementations.Aggregate(new HashSet<string>(), (set, method) => {
-          if (method.ReturnNullableAnnotation == NullableAnnotation.Annotated)
-          {
-            set.Add ("#return");
-          }
+        var nullableImplementationParameters = implementations.Aggregate (
+            new HashSet<string>(),
+            (set, method) =>
+            {
+              if (method.ReturnNullableAnnotation == NullableAnnotation.Annotated)
+                set.Add ("#return");
 
-          foreach (var nullableParamter in NullableParamters(method.Parameters))
-          {
-            set.Add (nullableParamter.Name);
-          }
-          return set;
-        });
+              foreach (var nullableParamter in NullableParamters (method.Parameters))
+                set.Add (nullableParamter.Name);
+              return set;
+            });
         yield return (interfaceMethod.DeclaringSyntaxReferences.FirstOrDefault(), nullableImplementationParameters.ToArray());
       }
     }
@@ -81,27 +79,27 @@ namespace NullableReferenceTypesRewriter.Inheritance
     public IEnumerable<(SyntaxReference, string[])> GetNullableImplementationParameters ()
     {
       var list = new List<(SyntaxReference, string[])>();
-      foreach (var (interfaceMethod, implementations) in _interfaceImplementations.Select(kvp => (kvp.Key, kvp.Value)))
+      foreach (var (interfaceMethod, implementations) in _interfaceImplementations.Select (kvp => (kvp.Key, kvp.Value)))
       {
         var returnEnumerable = interfaceMethod.ReturnNullableAnnotation == NullableAnnotation.Annotated
             ? new[] { "#return" }
             : Enumerable.Empty<string>();
 
         var nullableParameterNames = NullableParamters (interfaceMethod.Parameters)
-            .Select (param => param.Name).Concat(returnEnumerable)
+            .Select (param => param.Name).Concat (returnEnumerable)
             .ToArray();
         var implementationReferences = implementations.Select (impl => impl.DeclaringSyntaxReferences.FirstOrDefault()).ToArray();
 
         foreach (var implementationReference in implementationReferences)
-        {
-          list.Add((implementationReference, nullableParameterNames));
-        }
+          list.Add ((implementationReference, nullableParameterNames));
       }
+
       return list;
     }
 
     private IEnumerable<IParameterSymbol> NullableParamters (IEnumerable<IParameterSymbol> parameters)
-      => parameters.Where (p => p.NullableAnnotation == NullableAnnotation.Annotated);
-
+    {
+      return parameters.Where (p => p.NullableAnnotation == NullableAnnotation.Annotated);
+    }
   }
 }

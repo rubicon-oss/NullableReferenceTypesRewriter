@@ -11,6 +11,10 @@
 
   <ItemGroup>
     <Compile Remove="resources\**" CopyToPublishDirectory="Always" />
+    <Compile Include="resources\TestSolution\TestSolution\Class1.cs" />
+    <Compile Include="resources\TestSolution\TestSolution\Interface1.cs" />
+    <Compile Include="resources\TestSolution\TestSolution\obj\Debug\net472\TestSolution.AssemblyInfo.cs" />
+    <Compile Include="resources\TestSolution\TestSolution\Properties\AssemblyInfo.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -27,7 +31,15 @@
     <_Resources Include="$(ProjectDir)\resources\**\*.*" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Remove="resources\**" CopyToPublishDirectory="Always" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <_Resources Include="$(ProjectDir)\resources\**\*.*" />
+  </ItemGroup>
+
   <Target Name="CustomAfterBuild" AfterTargets="AfterBuild">
-  <Copy SourceFiles="@(_Resources)" DestinationFolder="$(OutputPath)\resources\%(RecursiveDir)" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" Retries="3" RetryDelayMilliseconds="300" />
+    <Copy SourceFiles="@(_Resources)" DestinationFolder="$(OutputPath)\resources\%(RecursiveDir)" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" Retries="3" RetryDelayMilliseconds="300" />
   </Target>
 </Project>

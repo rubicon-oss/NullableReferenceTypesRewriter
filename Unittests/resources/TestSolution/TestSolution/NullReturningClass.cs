@@ -11,28 +11,18 @@
 // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.CodeAnalysis;
-
-namespace NullableReferenceTypesRewriter.Inheritance
+namespace TestSolution
 {
-  public class InheritanceDocumentVisitor
+  public class NullReturningClass: INullReturningInterface, IReturningInterface
   {
-    public async Task<IEnumerable<(SyntaxReference, string[])>> Visit (Document document)
+    public string ReturnsNull ()
     {
-      var semantic = await document.GetSemanticModelAsync()
-                     ?? throw new ArgumentException ($"Document '{document.FilePath}' does not support providing a semantic model.");
-      var syntax = await document.GetSyntaxRootAsync()
-                   ?? throw new ArgumentException ($"Document '{document.FilePath}' does not support providing a syntax tree.");
+      throw new System.NotImplementedException();
+    }
 
-      var annotator = new InheritanceNullableParameterResolver (document, semantic);
-      annotator.Visit (syntax);
-
-      return annotator.GetNullableImplementationParameters()
-          .Concat (annotator.GetNullableInterfaceParameters());
+    public string? Returns ()
+    {
+      throw new System.NotImplementedException();
     }
   }
 }
