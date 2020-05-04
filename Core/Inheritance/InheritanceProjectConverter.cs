@@ -21,19 +21,19 @@ namespace NullableReferenceTypesRewriter.Inheritance
 {
   public class InheritanceProjectConverter
   {
-    public async Task<IEnumerable<(Document, Document)>> Convert (IEnumerable<Document> documents)
+    public async Task<IEnumerable<(Document, Document)>> Convert (IEnumerable<(Document, Document)> documents)
     {
       var nullableParameter = Enumerable.Empty<(SyntaxReference, string[])>();
 
       var documentList = documents.ToList();
-      foreach (var document in documentList)
+      foreach (var (_, document) in documentList)
         nullableParameter = nullableParameter.Concat (await new InheritanceDocumentVisitor().Visit (document));
 
       var docConverter = new InheritanceParameterAnnotatorDocumentConverter (nullableParameter);
       var newDocumentList = new List<(Document, Document)>();
 
-      foreach (var document in documentList)
-        newDocumentList.Add ((document, await docConverter.Convert (document)));
+      foreach (var (oldDocument, document) in documentList)
+        newDocumentList.Add ((oldDocument, await docConverter.Convert (document)));
 
       return newDocumentList;
     }

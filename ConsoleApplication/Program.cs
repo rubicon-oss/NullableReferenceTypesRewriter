@@ -12,6 +12,8 @@
 //
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -46,22 +48,22 @@ namespace NullableReferenceTypesRewriter.ConsoleApplication
       var solution = await LoadSolutionSpace (solutionPath);
       var project = LoadProject (solution, projectName);
 
-      var documents = await new InheritanceProjectConverter().Convert (project.Documents);
+      IEnumerable<(Document, Document)> converted = await ApplyConverter (
+          project.Documents,
+          new IDocumentConverter[]
+          {
+              new MethodReturnNullDocumentConverter(),
+              new LocalDeclarationNullDocumentConverter(),
+              new CastExpressionNullDocumentConverter(),
+              new MethodArgumentFromInvocationNullDocumentConverter(),
+              new ClassFieldNotInitializedDocumentConverter()
+          });
 
-      foreach (var (oldDocument, document) in documents)
+       converted = await new InheritanceProjectConverter().Convert (converted);
+
+      foreach (var (oldDocument, document) in converted)
       {
-        var convertedDocument = await ConverterUtilities.ApplyAll (
-            document,
-            new IDocumentConverter[]
-            {
-                new MethodReturnNullDocumentConverter(),
-                new LocalDeclarationNullDocumentConverter(),
-                new CastExpressionNullDocumentConverter(),
-                new MethodArgumentFromInvocationNullDocumentConverter(),
-                new ClassFieldNotInitializedDocumentConverter()
-            });
-
-        await WriteChanges (oldDocument, convertedDocument);
+        await WriteChanges (oldDocument, document);
       }
     }
 
@@ -94,6 +96,12 @@ namespace NullableReferenceTypesRewriter.ConsoleApplication
         project = project.WithCompilationOptions (compilationOptions);
 
       return project;
+    }
+
+    private static Task<(Document, Document)[]> ApplyConverter (IEnumerable<Document> documents, IEnumerable<IDocumentConverter> converters)
+    {
+      var tasks = documents.Select (async doc => (doc, await ConverterUtilities.ApplyAll (doc, converters)));
+      return Task.WhenAll(tasks);
     }
 
     private static Task<Solution> LoadSolutionSpace (string solutionPath)
