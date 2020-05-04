@@ -19,6 +19,7 @@ using NUnit.Framework;
 
 namespace NullableReferenceTypesRewriter.UnitTests.LocalDeclaration
 {
+  [TestFixture]
   public class LocalDeclarationNullAnnotatorTest
   {
     [Test]

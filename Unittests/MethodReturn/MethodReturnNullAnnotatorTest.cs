@@ -18,6 +18,7 @@ using NUnit.Framework;
 
 namespace NullableReferenceTypesRewriter.UnitTests.MethodReturn
 {
+  [TestFixture]
   public class MethodReturnNullAnnotatorTest
   {
     private const string c_classTemplate =

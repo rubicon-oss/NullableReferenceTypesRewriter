@@ -13,12 +13,15 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NullableReferenceTypesRewriter.MethodArguments;
 using NUnit.Framework;
 
 namespace NullableReferenceTypesRewriter.UnitTests.MethodArguments
 {
+  [TestFixture]
   public class MethodArgumentFromInvocationNullAnnotatorTest
   {
     private const string c_argumentTemplate =
