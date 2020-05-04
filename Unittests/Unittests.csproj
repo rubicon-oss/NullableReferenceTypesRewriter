@@ -10,14 +10,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="resources\**" CopyToPublishDirectory="Always" />
-    <Compile Include="resources\TestSolution\TestSolution\Class1.cs" />
-    <Compile Include="resources\TestSolution\TestSolution\Interface1.cs" />
-    <Compile Include="resources\TestSolution\TestSolution\obj\Debug\net472\TestSolution.AssemblyInfo.cs" />
-    <Compile Include="resources\TestSolution\TestSolution\Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="nunit" Version="3.12.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.15.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.4.0" />
@@ -25,10 +17,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Core\Core.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <_Resources Include="$(ProjectDir)\resources\**\*.*" />
   </ItemGroup>
 
   <ItemGroup>
