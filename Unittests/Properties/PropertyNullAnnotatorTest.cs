@@ -122,5 +122,20 @@ namespace NullableReferenceTypesRewriter.UnitTests.Properties
 
       Assert.That (annotated, Is.EqualTo (syntax));
     }
+
+    [Test]
+    public void PropertyAnnotator_WithReadonlyPropertyInInterface_DoesNotAnnotateNullable ()
+    {
+      var (semantic, syntax) = CompiledSourceFileProvider.CompileInNameSpace("TestNamespace",
+          @"public interface ITest
+{
+  string Property { get; }
+}");
+      var annotator = new PropertyNullAnnotator (semantic);
+
+      var annotated = annotator.Visit (syntax);
+
+      Assert.That (annotated, Is.EqualTo (syntax));
+    }
   }
 }

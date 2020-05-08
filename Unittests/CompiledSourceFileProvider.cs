@@ -81,7 +81,7 @@ namespace NullableReferenceTypesRewriter.UnitTests
       return CompileInClass ("TestClass", methodTemplate);
     }
 
-    private static (SemanticModel, SyntaxNode) CompileInNameSpace (string nameSpaceName, string nameSpaceContent)
+    public static (SemanticModel, SyntaxNode) CompileInNameSpace (string nameSpaceName, string nameSpaceContent)
     {
       var nameSpaceTemplate =
           "using System;\r\n" +
