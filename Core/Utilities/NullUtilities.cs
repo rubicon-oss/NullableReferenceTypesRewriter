@@ -12,6 +12,8 @@
 //
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -24,9 +26,16 @@ namespace NullableReferenceTypesRewriter.Utilities
   {
     public static bool ReturnsNull (MethodDeclarationSyntax node, SemanticModel semanticModel)
     {
+      return node.Body?.Statements != null
+             && ReturnsNull(node.Body.Statements, semanticModel);
+    }
+
+    public static bool ReturnsNull (IEnumerable<StatementSyntax> statements, SemanticModel semanticModel)
+    {
+      var statementSyntaxes = statements as StatementSyntax[] ?? statements.ToArray();
       var returnStatements = semanticModel.AnalyzeControlFlow (
-              node.Body?.Statements.First(),
-              node.Body?.Statements.Last())
+              statementSyntaxes.First(),
+              statementSyntaxes.Last())
           .ReturnStatements;
 
       return returnStatements.Any (
