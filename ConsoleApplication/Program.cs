@@ -28,6 +28,7 @@ using NullableReferenceTypesRewriter.Inheritance;
 using NullableReferenceTypesRewriter.LocalDeclaration;
 using NullableReferenceTypesRewriter.MethodArguments;
 using NullableReferenceTypesRewriter.MethodReturn;
+using NullableReferenceTypesRewriter.Properties;
 using NullableReferenceTypesRewriter.Utilities;
 
 namespace NullableReferenceTypesRewriter.ConsoleApplication
@@ -52,11 +53,12 @@ namespace NullableReferenceTypesRewriter.ConsoleApplication
           project.Documents,
           new IDocumentConverter[]
           {
-              new MethodReturnNullDocumentConverter(),
-              new LocalDeclarationNullDocumentConverter(),
-              new CastExpressionNullDocumentConverter(),
-              new MethodArgumentFromInvocationNullDocumentConverter(),
-              new ClassFieldNotInitializedDocumentConverter()
+                new MethodReturnNullDocumentConverter(),
+                new LocalDeclarationNullDocumentConverter(),
+                new CastExpressionNullDocumentConverter(),
+                new MethodArgumentFromInvocationNullDocumentConverter(),
+                new PropertyNullAnnotatorDocumentConverter(),
+                new ClassFieldNotInitializedDocumentConverter(),
           });
 
        converted = await new InheritanceProjectConverter().Convert (converted);
