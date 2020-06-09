@@ -32,11 +32,19 @@ namespace NullableReferenceTypesRewriter.Properties
     public override SyntaxNode? VisitPropertyDeclaration (PropertyDeclarationSyntax node)
     {
       if (HasCanBeNullAttribute (node)
-          || GetterReturnsNull (node)
-          || IsUninitialized (node))
+          || IsInClassOrStruct (node)
+          && (GetterReturnsNull (node)
+              || IsUninitialized (node)))
         return node.WithType (NullUtilities.ToNullable (node.Type));
 
       return node;
+    }
+
+    private bool IsInClassOrStruct (PropertyDeclarationSyntax node)
+    {
+      var parent = node.Parent;
+      return parent is ClassDeclarationSyntax
+             || parent is StructDeclarationSyntax;
     }
 
     private bool IsUninitialized (PropertyDeclarationSyntax node)
